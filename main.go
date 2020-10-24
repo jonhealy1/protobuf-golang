@@ -7,14 +7,57 @@ import (
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	complexpb "github.com/simplesteph/protobuf-example-go/src/complex"
+	enumpb "github.com/simplesteph/protobuf-example-go/src/enum_example"
 	simplepb "github.com/simplesteph/protobuf-example-go/src/simple"
 )
 
 func main() {
 	sm := doSimple()
 	readAndWriteDemo(sm)
+	jsonDemo(sm)
+
+	doEnum()
+
+	doComplex()
+}
+
+func doComplex() {
+	cm := complexpb.ComplexMessage{
+		OneDummy: &complexpb.DummyMessage{
+			Id:   1,
+			Name: "first message",
+		},
+		MultipleDummy: []*complexpb.DummyMessage{
+			&complexpb.DummyMessage{
+				Id:   2,
+				Name: "second message",
+			},
+			&complexpb.DummyMessage{
+				Id:   3,
+				Name: "third message",
+			},
+		},
+	}
+	fmt.Println(cm)
+}
+
+func doEnum() {
+	em := enumpb.EnumMessage{
+		Id:           42,
+		DayOfTheWeek: enumpb.DayOfTheWeek_THURSDAY,
+	}
+	em.DayOfTheWeek = enumpb.DayOfTheWeek_MONDAY
+	fmt.Println(em)
+}
+
+func jsonDemo(sm proto.Message) {
 	smAsString := toJSON(sm)
 	fmt.Println(smAsString)
+
+	sm2 := &simplepb.SimpleMessage{}
+	fromJSON(smAsString, sm2)
+	fmt.Println("Successfully create proto structs")
 }
 
 func toJSON(pb proto.Message) string {
@@ -25,6 +68,13 @@ func toJSON(pb proto.Message) string {
 		return ""
 	}
 	return out
+}
+
+func fromJSON(in string, pb proto.Message) {
+	err := jsonpb.UnmarshalString(in, pb)
+	if err != nil {
+		log.Fatalln("Can't convert to JSON", err)
+	}
 }
 
 func readAndWriteDemo(sm proto.Message) {
