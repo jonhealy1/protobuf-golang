@@ -11,11 +11,16 @@ import (
 
 func main() {
 	sm := doSimple()
-	writeToFile("simple.bin", sm)
-	// fmt.Println(sm)
-	// write to file
-	// read from file
+	readAndWriteDemo(sm)
 }
+
+func readAndWriteDemo(sm proto.Message) {
+	writeToFile("simple.bin", sm)
+	sm2 := &simplepb.SimpleMessage{}
+	readFromFile("simple.bin", sm2)
+	fmt.Println(sm2)
+}
+
 func writeToFile(fname string, pb proto.Message) error {
 	out, err := proto.Marshal(pb)
 	if err != nil {
@@ -30,6 +35,20 @@ func writeToFile(fname string, pb proto.Message) error {
 	return nil
 }
 
+func readFromFile(fname string, pb proto.Message) error {
+	in, err := ioutil.ReadFile(fname)
+	if err != nil {
+		log.Fatalln("Error reading file", err)
+		return err
+	}
+	err2 := proto.Unmarshal(in, pb)
+	if err2 != nil {
+		log.Fatalln("Couldn't put bytes into protobuf struct", err)
+		return err2
+	}
+	return nil
+}
+
 func doSimple() *simplepb.SimpleMessage {
 	sm := simplepb.SimpleMessage{
 		Id:         12345,
@@ -38,8 +57,8 @@ func doSimple() *simplepb.SimpleMessage {
 		SampleList: []int32{1, 4, 7, 8},
 	}
 	sm.Name = "I renamed you"
-	fmt.Println(sm)
+	//fmt.Println(sm)
 
-	fmt.Println("The ID is:", sm.GetId())
+	//fmt.Println("The ID is:", sm.GetId())
 	return &sm
 }
